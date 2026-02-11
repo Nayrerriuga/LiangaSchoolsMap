@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lianga Schools & Boundaries</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    
+    <style>
+        body { margin: 0; padding: 0; font-family: 'Montserrat', sans-serif; }
+        #map { height: 100vh; width: 100%; }
+
+        /* Compact Bubble Style */
+        .bubble-marker {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            filter: drop-shadow(0px 4px 4px rgba(0,0,0,0.5));
+        }
+        .bubble-content {
+            width: 80px;
+            height: 80px;
+            background-color: white;
+            border: 2px solid white;
+            border-radius: 50%;
+            overflow: hidden;
+        }
+        .bubble-content img { width: 100%; height: 100%; object-fit: cover; }
+        .bubble-tip {
+            width: 0; height: 0;
+            border-left: 6px solid transparent;
+            border-right: 6px solid transparent;
+            border-top: 8px solid white;
+        }
+        .bubble-label {
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 1px 6px;
+            border-radius: 4px;
+            font-size: 9px;
+            margin-top: 2px;
+            white-space: nowrap;
+        }
+        .leaflet-div-icon { background: transparent !important; border: none !important; }
+    </style>
+</head>
+<body>
+
+<div id="map"></div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+    // Initialize map
+    var map = L.map('map').setView([8.6350, 126.0750], 13);
+
+    // HYBRID SATELLITE (Satellite + Roads/Labels)
+    var hybridLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Transportation/MapServer/tile/{z}/{y}/{x}', {
+        attribution: 'Esri, HERE, Garmin'
+    });
+    
+    var satLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+        attribution: 'Tiles &copy; Esri'
+    }).addTo(map);
+
+    // Overlay the roads on the satellite
+    hybridLayer.addTo(map);
+
+    // ---------------------------------------------------------
+    // BARANGAY BOUNDARY SECTION
+    // ---------------------------------------------------------
+    // If you have a GeoJSON file, you add it like this:
+    /*
+    fetch('path_to_lianga_barangays.json')
+        .then(res => res.json())
+        .then(data => {
+            L.geoJSON(data, {
+                style: {
+                    color: "#3498db", // Line color
+                    weight: 2,
+                    fillOpacity: 0.1
+                }
+            }).addTo(map);
+        });
+    */
+
+    // School Markers
+    var schools = [
+        { name: "Lianga Central Elementary School", coords: [8.631787, 126.093274], img: "LCES.png" },
+        { name: "San Pedro Elementary School", coords: [8.630628, 126.046547], img: "SPES.png" },
+        { name: "R. Moreno Integrated School", coords: [8.645241, 126.089193], img: "RMIS.png" }
+    ];
+
+    schools.forEach(function(s) {
+        var icon = L.divIcon({
+            html: `<div class="bubble-marker">
+                    <div class="bubble-content"><img src="${s.img}"></div>
+                    <div class="bubble-tip"></div>
+                    <div class="bubble-label">${s.name}</div>
+                   </div>`,
+            iconSize: [50, 70],
+            iconAnchor: [25, 65]
+        });
+        L.marker(s.coords, { icon: icon }).addTo(map);
+    });
+</script>
+
+</body>
+</html>
